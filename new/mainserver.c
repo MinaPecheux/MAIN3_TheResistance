@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <time.h>
 
 #include <pthread.h>
 
@@ -23,7 +24,7 @@ int compteurVotes; // combien de votes ont été éffectués
 int compteurReussites; // combien de vote reussite
 int compteurRebelles; // combien de rebelles
 int compteurEspions;  // combien d'Espions
-int participantsMissions[5]={2,2,3,3,2};	// pour savoir combien de participant à la mission
+int participantsMissions[5]={2,3,2,3,3};	// pour savoir combien de participant à la mission
 int nbparticipants = 1;
 char serverbuffer[256];
 
@@ -52,6 +53,7 @@ M -> infos sur la mission
 P -> proposition d'equipe
 V -> vote
 L -> lancer la mission
+N -> envoi des comptes de missions reussies/ratees
 */
 
 /* PRINCIPE :
@@ -122,8 +124,9 @@ void initRoles() {
     }
     /* assign spy roles */
     for(i = 0; i < nbj; i++) {
-        if(intInArray(posEspions, nbespions, i))
+        if(intInArray(posEspions, nbespions, i)) {
             tableauJoueurs[i].role = 1;
+        }
         else
             tableauJoueurs[i].role = 0;
     }
@@ -158,7 +161,8 @@ void *server(void *ptr)
             error("ERROR on binding");
     listen(sockfd,5);
     clilen = sizeof(cli_addr);
-    while (1)
+    int running = 1;
+    while (running)
     {
         char mess[100];
         switch(currentState) {
@@ -191,7 +195,7 @@ void *server(void *ptr)
                     	sendMessage(compteurJoueurs - 1, mess);
                     }
                     /* broadcast 'waiting for players' message to all connected players */
-                    sprintf(mess, "m En attente de joueurs...");
+                    sprintf(mess, "m En_attente_de_joueurs...");
                     broadcast(mess);
                 }
                 close(newsockfd);
@@ -201,13 +205,13 @@ void *server(void *ptr)
 
                 break;
             case SENDING_ROLES:
-            	sleep(3);
+            	sleep(2);
                 sendRoles();
 
                 currentState = PROPOSING_TEAM;
                 break;
             case PROPOSING_TEAM:
-                sleep(3);
+                sleep(2);
                 sendMeneur();
 
                 sprintf(mess, "M %d %d", compteurMissions, participantsMissions[compteurMissions]);
@@ -291,25 +295,25 @@ void *server(void *ptr)
 	            }
 
 	            if(compteurReussites > compteurJoueurs / 2) {
-                    sprintf(mess, "m Equipe acceptée !");
+                    sprintf(mess, "m Equipe_acceptée_!");
                     broadcast(mess);
                     bzero(mess, 100);
                     int i;
                     for(i = 0; i < compteurJoueurs; i++) {
-                    	if(tableauJoueurs[i].equipe) {
-                    		sprintf(mess, "L %d", tableauJoueurs[i].role);
-                    		sendMessage(i, mess);
-                    	}
+                		sprintf(mess, "L %d %d", tableauJoueurs[i].role, tableauJoueurs[i].equipe);
+                		sendMessage(i, mess);
                     }
                     currentState = COMPLETING_MISSION;
 	            } else {
-                    sprintf(mess, "m Equipe refusée.");
+                    sprintf(mess, "m Equipe_refusée.");
                     broadcast(mess);
                     currentState = PROPOSING_TEAM;
 	            }
 
                 break;
             case COMPLETING_MISSION:
+            	sleep(2);
+
             	compteurVotes = 0;
             	compteurReussites = 0;
 
@@ -335,21 +339,32 @@ void *server(void *ptr)
 	            }
 
 	            if(compteurReussites > nb_participants / 2) {
-                    sprintf(mess, "m Mission réussie !");
+                    sprintf(mess, "m Mission_réussie_!");
                     broadcast(mess);
                     compteurVictoires++;
                     compteurMissions++;
                     switchCompleteMission();
+                    sprintf(mess, "N %d %d", compteurVictoires, compteurDefaites);
+                    broadcast(mess);
 	            } else {
-                    sprintf(mess, "m Mission ratée.");
+                    sprintf(mess, "m Mission_ratée.");
                     broadcast(mess);
                     compteurDefaites++;
                     compteurMissions++;
                     switchCompleteMission();
+                    sprintf(mess, "N %d %d", compteurVictoires, compteurDefaites);
+                    broadcast(mess);
 	            }
 
                 break;
             case ENDING_GAME:
+            	if(compteurVictoires == END)
+                	sprintf(mess, "m Partie_terminée._Les_REBELLES_ont_gagné.");
+                else if(compteurDefaites == END)
+                	sprintf(mess, "m Partie_terminée._Les_ESPIONS_ont_gagné.");
+                broadcast(mess);
+                sleep(3);
+                running = 0;
             	break;
             default:
                 break;
@@ -456,6 +471,7 @@ int main(int argc, char *argv[])
 {
     pthread_t thread1, thread2;
     int iret1, iret2;
+    srand(time(NULL));
 
 	if (argc!=3)
 	{
