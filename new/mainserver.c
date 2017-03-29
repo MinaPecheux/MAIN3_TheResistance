@@ -295,6 +295,8 @@ void *server(void *ptr)
 	                close(newsockfd);
 	            }
 
+	            sleep(1);
+
 	            if(compteurReussites > compteurJoueurs / 2) {
                     sprintf(mess, "m Equipe_acceptée_!");
                     broadcast(mess);

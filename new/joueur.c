@@ -42,6 +42,7 @@ GtkWidget *rolePlayer[8];
 GtkWidget *checkboxPlayer[8];
 GtkWidget *votePlayer[8];
 GtkWidget *radiovotePlayer[2];
+GtkWidget *radiosucceedPlayer[2];
 GtkWidget *boutonProposition;
 GtkWidget* rebelImage;
 GtkWidget* spyImage;
@@ -51,6 +52,217 @@ GtkWidget* spyWinImage;
 GtkTextBuffer *buffer;
 GtkWidget *text_view;
 GtkWidget *scrolled_window;
+
+struct mydata_
+{
+  char nom[100];
+  int active;
+  int index;
+} mydata;
+
+static gboolean got_connect_value(gpointer user_data)
+{
+  struct mydata_ *pm=(struct mydata_*)user_data;
+  char *nom=pm->nom;
+  int index=pm->index;
+
+  gtk_label_set_text ((GtkLabel*)labelPlayer[index], nom);
+
+  free(pm);
+
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean got_roles_value(gpointer user_data)
+{
+  struct mydata_ *pm=(struct mydata_*)user_data;
+  char *nom=pm->nom;
+  int active=pm->active;
+
+  /* active = espion */
+  if(active) {
+    int indexEspion1, indexEspion2;
+    sscanf(nom, "7 %d %d", &indexEspion1, &indexEspion2);
+    gtk_label_set_text ((GtkLabel*)rolePlayer[indexEspion1], "Espion");
+    gtk_label_set_text ((GtkLabel*)rolePlayer[indexEspion2], "Espion");
+
+    int i;
+    for (i = 0; i < 5; i++) {
+      if(i != indexEspion1 && i != indexEspion2)
+        gtk_label_set_text ((GtkLabel*)rolePlayer[i], "Rebelle");
+    }
+  } else {
+    int index;
+    sscanf(nom, "6 %d", &index);
+    gtk_label_set_text ((GtkLabel*)rolePlayer[index], "Rebelle");
+  }
+
+  free(pm);
+
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean got_meneur_value(gpointer user_data)
+{
+  struct mydata_ *pm=(struct mydata_*)user_data;
+  char *nom=pm->nom;
+  int active = pm->active;
+
+  gtk_widget_show (radiovotePlayer[0]);
+  gtk_widget_show (radiovotePlayer[1]);
+
+  int i;
+  if(active) {
+    for (i = 0; i < 5; i++) 
+      gtk_widget_set_sensitive (checkboxPlayer[i], TRUE);
+    gtk_widget_set_sensitive (boutonProposition, TRUE);
+  } else {
+    for (i = 0; i < 5; i++)
+      gtk_widget_set_sensitive (checkboxPlayer[i], FALSE);
+    gtk_widget_set_sensitive (boutonProposition, FALSE);
+  }
+
+  gtk_widget_hide (radiosucceedPlayer[0]);
+  gtk_widget_hide (radiosucceedPlayer[1]);
+
+  char tmp[50];
+  sprintf(tmp, "Meneur : %s", nom);
+  gtk_label_set_text ((GtkLabel*)labelMissionMeneur, tmp);
+
+  free(pm);
+
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean got_checkbox_values(gpointer user_data)
+{
+  struct mydata_ *pm=(struct mydata_*)user_data;
+  char *nom=pm->nom;
+  int active=pm->active;
+  int index=pm->index;
+
+  if(active)
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkboxPlayer[index]), TRUE);
+  else
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkboxPlayer[index]), FALSE);
+  gtk_widget_set_sensitive (radiovotePlayer[0], TRUE);
+  gtk_widget_set_sensitive (radiovotePlayer[1], TRUE);
+
+  free(pm);
+
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean got_mission_values(gpointer user_data)
+{
+  struct mydata_ *pm=(struct mydata_*)user_data;
+  int active = pm->active;
+  int index = pm->index;
+
+  sprintf(mission_number_text, "Mission n°%d", active);
+  sprintf(mission_nbj_text, "Nombre de participants : %d", index);
+  gtk_label_set_text ((GtkLabel*)labelMissionNumber, mission_number_text);
+  gtk_label_set_text ((GtkLabel*)labelMissionNbj, mission_nbj_text);
+
+  free(pm);
+
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean got_vote_values(gpointer user_data)
+{
+  struct mydata_ *pm=(struct mydata_*)user_data;
+  int active = pm->active;
+  int index = pm->index;
+
+  if(active)
+    gtk_label_set_text ((GtkLabel*)votePlayer[index], "O");
+  else
+    gtk_label_set_text ((GtkLabel*)votePlayer[index], "X");
+
+  free(pm);
+
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean got_launch_values(gpointer user_data)
+{
+  struct mydata_ *pm=(struct mydata_*)user_data;
+  int active = pm->active;
+  int index = pm->index;
+
+  int i;
+  for(i = 0; i < 5; i++)
+    gtk_label_set_text((GtkLabel*)votePlayer[i], "--------");
+
+  gtk_widget_hide (radiovotePlayer[0]);
+  gtk_widget_hide (radiovotePlayer[1]);
+
+  if(active) {
+    gtk_widget_show (radiosucceedPlayer[0]);
+    gtk_widget_show (radiosucceedPlayer[1]);
+    gtk_widget_set_sensitive (radiosucceedPlayer[0], TRUE);
+    if(index)
+      gtk_widget_set_sensitive (radiosucceedPlayer[1], TRUE);
+  }
+
+  free(pm);
+
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean got_mission_win_values(gpointer user_data)
+{
+  struct mydata_ *pm=(struct mydata_*)user_data;
+  int active = pm->active;
+  int index = pm->index;
+
+  sprintf(mission_win_text, "%d", active);
+  sprintf(mission_lose_text, "%d", index);
+  gtk_label_set_text ((GtkLabel*)labelMissionWin, mission_win_text);
+  gtk_label_set_text ((GtkLabel*)labelMissionLose, mission_lose_text);
+
+  free(pm);
+
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean got_final_result_values(gpointer user_data)
+{
+  struct mydata_ *pm=(struct mydata_*)user_data;
+  int index = pm->index;
+
+  gtk_widget_hide(labelAddrServer);
+  gtk_widget_hide(labelPortServer);
+  gtk_widget_hide(labelUsername);
+  gtk_widget_hide(labelMissionNumber);
+  gtk_widget_hide(labelMissionMeneur);
+  gtk_widget_hide(labelMissionNbj);
+  gtk_widget_hide(labelMissionWin);
+  gtk_widget_hide(labelMissionLose);
+  gtk_widget_hide(rebelImage);
+  gtk_widget_hide(spyImage);
+  int i;
+  for(i = 0; i < 5; i++) {
+    gtk_widget_hide(labelPlayer[i]);
+    gtk_widget_hide(rolePlayer[i]);
+    gtk_widget_hide(checkboxPlayer[i]);
+    gtk_widget_hide(votePlayer[i]);
+  }
+  gtk_widget_hide(radiovotePlayer[0]);
+  gtk_widget_hide(radiovotePlayer[1]);
+  gtk_widget_hide(boutonProposition);
+  gtk_widget_hide(text_view);
+
+  if(index == 0)
+    gtk_widget_show(rebelWinImage);
+  else
+    gtk_widget_show(spyWinImage);
+
+  free(pm);
+
+  return G_SOURCE_REMOVE;
+}
 
 void sendMessageToMainServer(char *mess);
 
@@ -103,152 +315,115 @@ void *server_func(void *ptr)
       	if (server_thread_buffer[0]=='1') {
       		int j_index = 0;
       		sscanf(server_thread_buffer, "1 %d", &j_index);
-      		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkboxPlayer[j_index]), TRUE);
-      		gtk_widget_set_sensitive (radiovotePlayer[0], TRUE);
-      		gtk_widget_set_sensitive (radiovotePlayer[1], TRUE);
+          struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+          d->active = 1;
+          d->index = j_index;
+          gdk_threads_add_idle(got_checkbox_values, d);
       	}
       	else if (server_thread_buffer[0]=='0') {
       		int j_index = 0;
       		sscanf(server_thread_buffer, "0 %d", &j_index);
-      		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkboxPlayer[j_index]), FALSE);
-      		gtk_widget_set_sensitive (radiovotePlayer[0], TRUE);
-      		gtk_widget_set_sensitive (radiovotePlayer[1], TRUE);
+          struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+          d->active = 0;
+          d->index = j_index;
+          gdk_threads_add_idle(got_checkbox_values, d);
       	}
       	else if (server_thread_buffer[0]=='2') {
-      		int i;
-      		for (i = 0; i < 5; i++) 
-      			gtk_widget_set_sensitive (checkboxPlayer[i], TRUE);
-      		gtk_widget_set_sensitive (boutonProposition, TRUE);
+          char nom[50];
+          sscanf(server_thread_buffer , "2 %s", nom);
 
-        	char nom[50];
-        	sscanf(server_thread_buffer , "2 %s", nom);
-        	sprintf(mission_meneur_text, "Meneur : %s", nom);
-        	gtk_label_set_text ((GtkLabel*)labelMissionMeneur, mission_meneur_text);
-
-      		gtk_button_set_label(GTK_BUTTON(radiovotePlayer[0]), "Oui");
-      		gtk_button_set_label(GTK_BUTTON(radiovotePlayer[1]), "Non");
+          struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+          d->active = 1;
+          strcpy(d->nom, nom);
+          gdk_threads_add_idle(got_meneur_value, d);
       	}
       	else if (server_thread_buffer[0]=='3') {
-      		int i;
-      		for (i = 0; i < 5; i++)
-      			gtk_widget_set_sensitive (checkboxPlayer[i], FALSE);
-      		gtk_widget_set_sensitive (boutonProposition, FALSE);
+          char nom[50];
+          sscanf(server_thread_buffer , "3 %s", nom);
 
-        	char nom[50];
-        	sscanf(server_thread_buffer , "3 %s", nom);
-        	sprintf(mission_meneur_text, "Meneur : %s", nom);
-        	gtk_label_set_text ((GtkLabel*)labelMissionMeneur, mission_meneur_text);
-
-      		gtk_button_set_label(GTK_BUTTON(radiovotePlayer[0]), "Oui");
-      		gtk_button_set_label(GTK_BUTTON(radiovotePlayer[1]), "Non");
+          struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+          d->active = 0;
+          strcpy(d->nom, nom);
+          gdk_threads_add_idle(got_meneur_value, d);
       	}
-      	else if (server_thread_buffer[0]=='4')
-      		gtk_widget_set_sensitive (boutonProposition, TRUE);
-      	else if (server_thread_buffer[0]=='5')
-      		gtk_widget_set_sensitive (boutonProposition, FALSE);
+      	else if (server_thread_buffer[0]=='4') {}
+      	else if (server_thread_buffer[0]=='5') {}
       	else if (server_thread_buffer[0]=='6') {
-      		int index;
-      		sscanf(server_thread_buffer, "6 %d", &index);
-      		gtk_label_set_text ((GtkLabel*)rolePlayer[index], "Rebelle");
+          struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+          d->active = 0;
+          strcpy(d->nom, server_thread_buffer);
+          gdk_threads_add_idle(got_roles_value, d);
       	}
       	else if (server_thread_buffer[0]=='7') {
-      		int indexEspion1, indexEspion2;
-      		sscanf(server_thread_buffer, "7 %d %d", &indexEspion1, &indexEspion2);
-      		gtk_label_set_text ((GtkLabel*)rolePlayer[indexEspion1], "Espion");
-      		gtk_label_set_text ((GtkLabel*)rolePlayer[indexEspion2], "Espion");
-
-      		int i;
-      		for (i = 0; i < 5; i++) {
-      			if(i != indexEspion1 && i != indexEspion2)
-      				gtk_label_set_text ((GtkLabel*)rolePlayer[i], "Rebelle");
-      		}
+          struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+          d->active = 1;
+          strcpy(d->nom, server_thread_buffer);
+          gdk_threads_add_idle(got_roles_value, d);
       	}
       	else if (server_thread_buffer[0]=='C') {
         	char connect;
         	char nom[100];
         	int index;
 
-            printf("Commande C\n");
-            sscanf ( server_thread_buffer , "%c %s %d" , &connect, nom, &index);
+          printf("Commande C\n");
+          sscanf(server_thread_buffer , "%c %s %d" , &connect, nom, &index);
 		
-		    printf("nom=%s index=%d\n",nom, index);
+		      printf("nom=%s index=%d\n", nom, index);
 
-		    gtk_label_set_text ((GtkLabel*)labelPlayer[index], nom);
+          struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+          strcpy(d->nom, nom);
+          d->index = index;
+          gdk_threads_add_idle(got_connect_value, d);
 	    }
       else if (server_thread_buffer[0]=='M') {
-      		int mission_nb = 0;
-            sscanf (server_thread_buffer , "M %d %d", &mission_nb, &mission_nbj);
+          int mission_nb = 0;
+          sscanf (server_thread_buffer , "M %d %d", &mission_nb, &mission_nbj);
 
-            sprintf(mission_number_text, "Mission n°%d", mission_nb);
-            sprintf(mission_nbj_text, "Nombre de participants : %d", mission_nbj);
-            gtk_label_set_text ((GtkLabel*)labelMissionNumber, mission_number_text);
-            gtk_label_set_text ((GtkLabel*)labelMissionNbj, mission_nbj_text);
+          struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+          d->active = mission_nb;
+          d->index = mission_nbj;
+          gdk_threads_add_idle(got_mission_values, d);
  	    }
       else if (server_thread_buffer[0]=='V') {
         char vote;
         int playerId;
         sscanf(server_thread_buffer, "V %c %d", &vote, &playerId);
 
-        if(vote == 'o')
-          gtk_label_set_text ((GtkLabel*)votePlayer[playerId], "O");
-        else
-          gtk_label_set_text ((GtkLabel*)votePlayer[playerId], "X");
+        struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+        d->index = playerId;
+        if(vote == 'o') {
+          d->active = 1;
+        }
+        else {
+          d->active = 0;
+        }
+        gdk_threads_add_idle(got_vote_values, d);
       }
       else if (server_thread_buffer[0]=='L') {
         int role, in_team;
         sscanf(server_thread_buffer, "L %d %d", &role, &in_team);
 
-        int i;
-        for(i = 0; i < 5; i++)
-          gtk_label_set_text((GtkLabel*)votePlayer[i], "--------");
-
-        if(in_team) {
-          gtk_button_set_label(GTK_BUTTON(radiovotePlayer[0]), "Succes");
-          gtk_button_set_label(GTK_BUTTON(radiovotePlayer[1]), "Echec");
-          gtk_widget_set_sensitive (radiovotePlayer[0], TRUE);
-          if(role)
-            gtk_widget_set_sensitive (radiovotePlayer[1], TRUE);
-        }
+        struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+        d->active = in_team;
+        d->index = role;
+        gdk_threads_add_idle(got_launch_values, d);
       }
       else if (server_thread_buffer[0]=='N') {
         int w, l;
         sscanf(server_thread_buffer, "N %d %d", &w, &l);
 
-        sprintf(mission_win_text, "%d", w);
-        sprintf(mission_lose_text, "%d", l);
-        gtk_label_set_text ((GtkLabel*)labelMissionWin, mission_win_text);
-        gtk_label_set_text ((GtkLabel*)labelMissionLose, mission_lose_text);
+        struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+        d->active = w;
+        d->index = l;
+        gdk_threads_add_idle(got_mission_win_values, d);
       }
       else if (server_thread_buffer[0]=='R') {
         int res;
         sscanf(server_thread_buffer, "R %d", &res);
 
-        gtk_widget_hide(labelAddrServer);
-        gtk_widget_hide(labelPortServer);
-        gtk_widget_hide(labelUsername);
-        gtk_widget_hide(labelMissionNumber);
-        gtk_widget_hide(labelMissionMeneur);
-        gtk_widget_hide(labelMissionNbj);
-        gtk_widget_hide(labelMissionWin);
-        gtk_widget_hide(labelMissionLose);
-        gtk_widget_hide(rebelImage);
-        gtk_widget_hide(spyImage);
-        int i;
-        for(i = 0; i < 5; i++) {
-          gtk_widget_hide(labelPlayer[i]);
-          gtk_widget_hide(rolePlayer[i]);
-          gtk_widget_hide(checkboxPlayer[i]);
-          gtk_widget_hide(votePlayer[i]);
-        }
-        gtk_widget_hide(radiovotePlayer[0]);
-        gtk_widget_hide(radiovotePlayer[1]);
-        gtk_widget_hide(boutonProposition);
-        gtk_widget_hide(text_view);
-
-        if(res == 0)
-          gtk_widget_show(rebelWinImage);
-        else
-          gtk_widget_show(spyWinImage);
+        struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+        d->index = res;
+        gdk_threads_add_idle(got_final_result_values, d);
       }
       else if (server_thread_buffer[0]=='m') {
         char separator = '_';
@@ -468,7 +643,7 @@ int main(int argc, char** argv) {
     gtk_widget_modify_fg (labelPlayer[i], GTK_STATE_NORMAL, &white);
 
     checkboxPlayer[i] = gtk_check_button_new();
-	GTK_WIDGET_UNSET_FLAGS(checkboxPlayer[i], GTK_CAN_FOCUS);
+	  GTK_WIDGET_UNSET_FLAGS(checkboxPlayer[i], GTK_CAN_FOCUS);
   	gtk_fixed_put(GTK_FIXED(fixed), checkboxPlayer[i], 100, 100+i*20);
   	gtk_widget_set_size_request(checkboxPlayer[i],30,20);
 
@@ -487,18 +662,19 @@ int main(int argc, char** argv) {
   gtk_fixed_put(GTK_FIXED(fixed), boutonProposition, 400, 100);
   gtk_widget_set_size_request(votePlayer[i],100,20);
   g_signal_connect(G_OBJECT(boutonProposition), "clicked", G_CALLBACK(click_boutonProposition), G_OBJECT(window));
+  gtk_widget_set_sensitive (boutonProposition, FALSE);
 
-  labelMissionNumber = gtk_label_new(mission_number_text);
+  labelMissionNumber = gtk_label_new("");
   gtk_fixed_put(GTK_FIXED(fixed), labelMissionNumber, 0, 220);
   gtk_widget_set_size_request(labelMissionNumber,200,20);
   gtk_widget_modify_fg (labelMissionNumber, GTK_STATE_NORMAL, &white);
 
-  labelMissionMeneur = gtk_label_new(mission_meneur_text);
+  labelMissionMeneur = gtk_label_new("");
   gtk_fixed_put(GTK_FIXED(fixed), labelMissionMeneur, 0, 245);
   gtk_widget_set_size_request(labelMissionMeneur,200,20);
   gtk_widget_modify_fg (labelMissionMeneur, GTK_STATE_NORMAL, &white);
 
-  labelMissionNbj = gtk_label_new(mission_nbj_text);
+  labelMissionNbj = gtk_label_new("");
   gtk_fixed_put(GTK_FIXED(fixed), labelMissionNbj, 0, 270);
   gtk_widget_set_size_request(labelMissionNbj,200,20);
   gtk_widget_modify_fg (labelMissionNbj, GTK_STATE_NORMAL, &white);
@@ -545,6 +721,18 @@ int main(int argc, char** argv) {
   g_signal_connect(radiovotePlayer[1], "clicked", G_CALLBACK(voteNon), (gpointer) window);
   gtk_widget_set_sensitive (radiovotePlayer[1], FALSE);
 
+  radiosucceedPlayer[0] = gtk_button_new_with_label("Succes");
+  gtk_fixed_put(GTK_FIXED(fixed), radiosucceedPlayer[0], 400, 200);
+  gtk_widget_set_size_request(radiosucceedPlayer[0],60,30);
+  g_signal_connect(radiosucceedPlayer[0], "clicked", G_CALLBACK(voteOui), (gpointer) window);
+  gtk_widget_set_sensitive (radiosucceedPlayer[0], FALSE);
+
+  radiosucceedPlayer[1] = gtk_button_new_with_label("Echec");
+  gtk_fixed_put(GTK_FIXED(fixed), radiosucceedPlayer[1], 500, 200);
+  gtk_widget_set_size_request(radiosucceedPlayer[1],60,30);
+  g_signal_connect(radiosucceedPlayer[1], "clicked", G_CALLBACK(voteNon), (gpointer) window);
+  gtk_widget_set_sensitive (radiosucceedPlayer[1], FALSE);
+
   rebelWinImage = gtk_image_new_from_file("rebel_placard-small.png");
   gtk_fixed_put(GTK_FIXED(fixed), rebelWinImage, 200, 0);
   gtk_widget_set_size_request(rebelWinImage, 424, 600);
@@ -558,6 +746,8 @@ int main(int argc, char** argv) {
 
   gtk_widget_hide(rebelWinImage);
   gtk_widget_hide(spyWinImage);
+  gtk_widget_hide (radiosucceedPlayer[0]);
+  gtk_widget_hide (radiosucceedPlayer[1]);
 
   sprintf(com_connexion,"C %s %s %s",localServerAddr,localServerPort,username);
   sendMessageToMainServer(com_connexion);
