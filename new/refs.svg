@@ -13,8 +13,8 @@
    height="297mm"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="Nouveau document 1">
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="refs.svg">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -24,17 +24,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.24748737"
-     inkscape:cx="-239.38789"
-     inkscape:cy="922.13917"
+     inkscape:zoom="0.16"
+     inkscape:cx="39.801071"
+     inkscape:cy="-896.40318"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1280"
-     inkscape:window-height="972"
-     inkscape:window-x="0"
+     inkscape:window-width="776"
+     inkscape:window-height="725"
+     inkscape:window-x="569"
      inkscape:window-y="0"
-     inkscape:window-maximized="1" />
+     inkscape:window-maximized="0" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -43,7 +43,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -192,5 +192,32 @@
        inkscape:export-filename="/home/sasl/eleves/main/3407915/MAIN3/Informatique/OS/scripts/TheResistance/MAIN3_TheResistance/new/rebel.png"
        inkscape:export-xdpi="13.494204"
        inkscape:export-ydpi="13.494204" />
+    <circle
+       r="254.28572"
+       cy="418.07648"
+       cx="-1614.2858"
+       style="fill:none;stroke:#ff0000;stroke-width:25;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="path3781-0"
+       inkscape:export-filename="/home/sasl/eleves/main/3407915/MAIN3/Informatique/OS/scripts/TheResistance/MAIN3_TheResistance/new/spy.png"
+       inkscape:export-xdpi="13.493974"
+       inkscape:export-ydpi="13.493974" />
+    <g
+       id="g4194"
+       transform="translate(1.5713834,-3.7372529)"
+       inkscape:export-xdpi="13.493974"
+       inkscape:export-ydpi="13.493974">
+      <path
+         sodipodi:nodetypes="sssss"
+         inkscape:connector-curvature="0"
+         id="path4146"
+         d="m -1615.7327,421.81372 c 0,43.99378 -87.9394,79.65776 -131.9332,79.65776 -43.9938,0 -79.6577,-35.66402 -79.6577,-79.65776 0,-43.99373 35.6639,-79.65771 79.6577,-79.65775 43.9938,0 131.9332,35.66398 131.9332,79.65775 z"
+         style="fill:none;fill-opacity:1;stroke:#ff0000;stroke-width:25;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <path
+         sodipodi:nodetypes="sssss"
+         inkscape:connector-curvature="0"
+         id="path4146-2"
+         d="m -1615.9816,421.81373 c 0,43.99378 87.9395,79.65776 131.9332,79.65776 43.9938,0 79.6577,-35.66402 79.6577,-79.65776 0,-43.99374 -35.6639,-79.65771 -79.6577,-79.65775 -43.9937,-10e-6 -131.9332,35.66398 -131.9332,79.65775 z"
+         style="fill:none;fill-opacity:1;stroke:#ff0000;stroke-width:25;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    </g>
   </g>
 </svg>
