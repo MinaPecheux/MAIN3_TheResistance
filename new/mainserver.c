@@ -22,6 +22,7 @@ int compteurVictoires = 0; // pour savoir combien de missions ont ete "succes"
 int compteurDefaites = 0; // pour savoir combien de missions ont ete "echec"
 int compteurVotes; // combien de votes ont été éffectués
 int compteurReussites; // combien de vote reussite
+int compteurEchecs;		// combien de vote echec
 int compteurRebelles; // combien de rebelles
 int compteurEspions;  // combien d'Espions
 int participantsMissions[5]={2,3,2,3,3};	// pour savoir combien de participant à la mission
@@ -318,7 +319,7 @@ void *server(void *ptr)
             	sleep(2);
 
             	compteurVotes = 0;
-            	compteurReussites = 0;
+            	compteurEchecs = 0;
 
             	int nb_participants = participantsMissions[compteurMissions];
             	while(compteurVotes < nb_participants) {
@@ -334,14 +335,14 @@ void *server(void *ptr)
 	                    bzero(mess, 100);
 	                    sscanf(serverbuffer, "V %s", mess);
 
-	                    if(strcmp(mess, "oui") == 0)
-	                    	compteurReussites++;
+	                    if(strcmp(mess, "non") == 0)
+	                    	compteurEchecs++;
 	                    compteurVotes++;
 	                }
 	                close(newsockfd);
 	            }
 
-	            if(compteurReussites > nb_participants / 2) {
+	            if(compteurEchecs < 1) {
                     sprintf(mess, "m Mission_réussie_!");
                     broadcast(mess);
                     compteurVictoires++;
