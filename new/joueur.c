@@ -264,6 +264,28 @@ static gboolean got_final_result_values(gpointer user_data)
   return G_SOURCE_REMOVE;
 }
 
+static gboolean got_buffer_value(gpointer user_data)
+{
+  struct mydata_ *pm=(struct mydata_*)user_data;
+  char *nom = pm->nom;
+
+  GtkTextMark *mark;
+  GtkTextIter iter;
+
+  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
+  if(buffer != NULL) {
+    GtkTextIter start;
+    GtkTextIter end;
+    gtk_text_buffer_get_bounds(buffer, &start, &end);
+    gtk_text_buffer_delete(buffer, &start, &end);
+  }
+  gtk_text_buffer_insert (buffer, &iter, nom, strlen(nom));
+
+  free(pm);
+
+  return G_SOURCE_REMOVE;
+}
+
 void sendMessageToMainServer(char *mess);
 
 void *server_func(void *ptr)
@@ -441,17 +463,9 @@ void *server_func(void *ptr)
         msg_clean[i] = '\0';
         sprintf(msg_clean, "%s\n", msg_clean);
 
-		    GtkTextMark *mark;
-		    GtkTextIter iter;
-
-		    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
-        if(buffer != NULL) {
-          GtkTextIter start;
-          GtkTextIter end;
-          gtk_text_buffer_get_bounds(buffer, &start, &end);
-          gtk_text_buffer_delete(buffer, &start, &end);
-        }
-		    gtk_text_buffer_insert (buffer, &iter, msg_clean, strlen(msg_clean));
+        struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+        strcpy(d->nom, msg_clean);
+        gdk_threads_add_idle(got_buffer_value, d);
 	    }
 
         close(newsockfd);
