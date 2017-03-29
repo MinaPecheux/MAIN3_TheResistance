@@ -30,8 +30,9 @@ GtkWidget *labelMissionMeneur;
 GtkWidget *labelMissionNbj;
 GtkWidget *labelMissionWin;
 GtkWidget *labelMissionLose;
+GdkColor white;
 char mission_number_text[50];
-char mission_meneur_text[50];
+char mission_meneur_text[100];
 int mission_nbj = -1;
 char mission_nbj_text[50];
 char mission_win_text[5];
@@ -42,6 +43,10 @@ GtkWidget *checkboxPlayer[8];
 GtkWidget *votePlayer[8];
 GtkWidget *radiovotePlayer[2];
 GtkWidget *boutonProposition;
+GtkWidget* rebelImage;
+GtkWidget* spyImage;
+GtkWidget* rebelWinImage;
+GtkWidget* spyWinImage;
 
 GtkTextBuffer *buffer;
 GtkWidget *text_view;
@@ -115,7 +120,7 @@ void *server_func(void *ptr)
       			gtk_widget_set_sensitive (checkboxPlayer[i], TRUE);
       		gtk_widget_set_sensitive (boutonProposition, TRUE);
 
-        	char nom[100];
+        	char nom[50];
         	sscanf(server_thread_buffer , "2 %s", nom);
         	sprintf(mission_meneur_text, "Meneur : %s", nom);
         	gtk_label_set_text ((GtkLabel*)labelMissionMeneur, mission_meneur_text);
@@ -214,6 +219,37 @@ void *server_func(void *ptr)
         gtk_label_set_text ((GtkLabel*)labelMissionWin, mission_win_text);
         gtk_label_set_text ((GtkLabel*)labelMissionLose, mission_lose_text);
       }
+      else if (server_thread_buffer[0]=='R') {
+        int res;
+        sscanf(server_thread_buffer, "R %d", &res);
+
+        gtk_widget_hide(labelAddrServer);
+        gtk_widget_hide(labelPortServer);
+        gtk_widget_hide(labelUsername);
+        gtk_widget_hide(labelMissionNumber);
+        gtk_widget_hide(labelMissionMeneur);
+        gtk_widget_hide(labelMissionNbj);
+        gtk_widget_hide(labelMissionWin);
+        gtk_widget_hide(labelMissionLose);
+        gtk_widget_hide(rebelImage);
+        gtk_widget_hide(spyImage);
+        int i;
+        for(i = 0; i < 5; i++) {
+          gtk_widget_hide(labelPlayer[i]);
+          gtk_widget_hide(rolePlayer[i]);
+          gtk_widget_hide(checkboxPlayer[i]);
+          gtk_widget_hide(votePlayer[i]);
+        }
+        gtk_widget_hide(radiovotePlayer[0]);
+        gtk_widget_hide(radiovotePlayer[1]);
+        gtk_widget_hide(boutonProposition);
+        gtk_widget_hide(text_view);
+
+        if(res == 0)
+          gtk_widget_show(rebelWinImage);
+        else
+          gtk_widget_show(spyWinImage);
+      }
       else if (server_thread_buffer[0]=='m') {
         char separator = '_';
         char msg[100];
@@ -234,11 +270,13 @@ void *server_func(void *ptr)
 		    GtkTextIter iter;
 
 		    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
-        //GtkTextIter *start, *end;
-        //gtk_text_buffer_get_bounds(buffer, start, end);
-        //gtk_text_buffer_delete(buffer, start, end);
-		    gtk_text_buffer_get_iter_at_offset(buffer, &iter, 0);
-		    gtk_text_buffer_insert (buffer, &iter, msg_clean, -1);
+        if(buffer != NULL) {
+          GtkTextIter start;
+          GtkTextIter end;
+          gtk_text_buffer_get_bounds(buffer, &start, &end);
+          gtk_text_buffer_delete(buffer, &start, &end);
+        }
+		    gtk_text_buffer_insert (buffer, &iter, msg_clean, strlen(msg_clean));
 	    }
 
         close(newsockfd);
@@ -248,9 +286,6 @@ void *server_func(void *ptr)
 
 void click_boutonProposition(GtkWidget *widget, gpointer window) 
 {
-    GtkTextMark *mark;
-    GtkTextIter iter;
-
 	printf("click_boutonProposition\n");
 
 	int selected_joueurs_nb = 0;
@@ -277,12 +312,19 @@ void click_boutonProposition(GtkWidget *widget, gpointer window)
   			gtk_widget_set_sensitive (checkboxPlayer[i], FALSE);
 		gtk_widget_set_sensitive (boutonProposition, FALSE);
 	} else {
-	    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
-	    gtk_text_buffer_get_iter_at_offset(buffer, &iter, 0);
-	    gtk_text_buffer_insert (buffer, &iter, "Nombre de joueurs choisis incorrect !\n", -1);
+      GtkTextMark *mark;
+      GtkTextIter iter;
+      buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
+      if(buffer != NULL) {
+        GtkTextIter start;
+        GtkTextIter end;
+        gtk_text_buffer_get_bounds(buffer, &start, &end);
+        gtk_text_buffer_delete(buffer, &start, &end);
+      }
+      gtk_text_buffer_insert (buffer, &iter, "Nombre de joueurs choisis incorrect !\n", -1);
 	}
 
-    free(selected_joueurs);
+  free(selected_joueurs);
 }
 
 void voteOui(GtkWidget *widget, gpointer window) {
@@ -384,10 +426,12 @@ int main(int argc, char** argv) {
 
   gtk_init(&argc, &argv);
 
+  gdk_color_parse("#FFFFFF", &white);
+
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
   gtk_window_set_title(GTK_WINDOW(window), "The Resistance");
-  gtk_container_set_border_width(GTK_CONTAINER(window), 15);
+  gtk_container_set_border_width(GTK_CONTAINER(window), 0);
   gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
 
   fixed = gtk_fixed_new();
@@ -395,30 +439,33 @@ int main(int argc, char** argv) {
 
   /* background image */
   GtkWidget* bgImage;
-  bgImage = gtk_image_new_from_file("img.png");
-  gtk_fixed_put(GTK_FIXED(fixed), bgImage, 600, 400);
-  gtk_widget_set_size_request(bgImage, 200, 200);
+  bgImage = gtk_image_new_from_file("background.png");
+  gtk_fixed_put(GTK_FIXED(fixed), bgImage, 0, 0);
 
   sprintf(addr_server_text,"Adresse serveur: %s",argv[1]);
   labelAddrServer = gtk_label_new(addr_server_text);
   gtk_fixed_put(GTK_FIXED(fixed), labelAddrServer, 0, 0);
   gtk_widget_set_size_request(labelAddrServer,200,20);
+  gtk_widget_modify_fg (labelAddrServer, GTK_STATE_NORMAL, &white);
 
   sprintf(port_server_text,"Port serveur: %s",argv[2]);
   labelPortServer = gtk_label_new(port_server_text);
   gtk_fixed_put(GTK_FIXED(fixed), labelPortServer, 200, 0);
   gtk_widget_set_size_request(labelPortServer,200,20);
+  gtk_widget_modify_fg (labelPortServer, GTK_STATE_NORMAL, &white);
 
   sprintf(username_text,"Nom du joueur : %s",argv[5]);
   labelUsername = gtk_label_new(username_text);
   gtk_fixed_put(GTK_FIXED(fixed), labelUsername, 400, 0);
   gtk_widget_set_size_request(labelUsername,200,20);
+  gtk_widget_modify_fg (labelUsername, GTK_STATE_NORMAL, &white);
 
   for (i = 0; i < 5; i++)
   {
   	labelPlayer[i] = gtk_label_new("Inconnu");
   	gtk_fixed_put(GTK_FIXED(fixed), labelPlayer[i], 0, 100+i*20);
   	gtk_widget_set_size_request(labelPlayer[i],100,20);
+    gtk_widget_modify_fg (labelPlayer[i], GTK_STATE_NORMAL, &white);
 
     checkboxPlayer[i] = gtk_check_button_new();
 	GTK_WIDGET_UNSET_FLAGS(checkboxPlayer[i], GTK_CAN_FOCUS);
@@ -428,10 +475,12 @@ int main(int argc, char** argv) {
   	rolePlayer[i] = gtk_label_new("?");
   	gtk_fixed_put(GTK_FIXED(fixed), rolePlayer[i], 150, 100+i*20);
   	gtk_widget_set_size_request(rolePlayer[i],60,20);
+    gtk_widget_modify_fg (rolePlayer[i], GTK_STATE_NORMAL, &white);
 
     votePlayer[i] = gtk_label_new("--------");
   	gtk_fixed_put(GTK_FIXED(fixed), votePlayer[i], 210, 100+i*20);
   	gtk_widget_set_size_request(votePlayer[i],60,20);
+    gtk_widget_modify_fg (votePlayer[i], GTK_STATE_NORMAL, &white);
   }
 
   boutonProposition = gtk_button_new_with_label("Proposition");
@@ -442,16 +491,18 @@ int main(int argc, char** argv) {
   labelMissionNumber = gtk_label_new(mission_number_text);
   gtk_fixed_put(GTK_FIXED(fixed), labelMissionNumber, 0, 220);
   gtk_widget_set_size_request(labelMissionNumber,200,20);
+  gtk_widget_modify_fg (labelMissionNumber, GTK_STATE_NORMAL, &white);
 
   labelMissionMeneur = gtk_label_new(mission_meneur_text);
   gtk_fixed_put(GTK_FIXED(fixed), labelMissionMeneur, 0, 245);
   gtk_widget_set_size_request(labelMissionMeneur,200,20);
+  gtk_widget_modify_fg (labelMissionMeneur, GTK_STATE_NORMAL, &white);
 
   labelMissionNbj = gtk_label_new(mission_nbj_text);
   gtk_fixed_put(GTK_FIXED(fixed), labelMissionNbj, 0, 270);
   gtk_widget_set_size_request(labelMissionNbj,200,20);
+  gtk_widget_modify_fg (labelMissionNbj, GTK_STATE_NORMAL, &white);
 
-  GtkWidget* rebelImage;
   rebelImage = gtk_image_new_from_file("rebel.png");
   gtk_fixed_put(GTK_FIXED(fixed), rebelImage, 80, 320);
   gtk_widget_set_size_request(rebelImage, 80, 80);
@@ -460,8 +511,8 @@ int main(int argc, char** argv) {
   labelMissionWin = gtk_label_new(mission_win_text);
   gtk_fixed_put(GTK_FIXED(fixed), labelMissionWin, 0, 400);
   gtk_widget_set_size_request(labelMissionWin,200,20);
+  gtk_widget_modify_fg (labelMissionWin, GTK_STATE_NORMAL, &white);
 
-  GtkWidget* spyImage;
   spyImage = gtk_image_new_from_file("spy.png");
   gtk_fixed_put(GTK_FIXED(fixed), spyImage, 280, 320);
   gtk_widget_set_size_request(spyImage, 80, 80);
@@ -470,13 +521,14 @@ int main(int argc, char** argv) {
   labelMissionLose = gtk_label_new(mission_lose_text);
   gtk_fixed_put(GTK_FIXED(fixed), labelMissionLose, 200, 400);
   gtk_widget_set_size_request(labelMissionLose,200,20);
+  gtk_widget_modify_fg (labelMissionLose, GTK_STATE_NORMAL, &white);
 
   text_view = gtk_text_view_new();
   gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (text_view), GTK_WRAP_WORD);
   scrolled_window = gtk_scrolled_window_new (NULL, NULL);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_window), 
-                                  GTK_POLICY_AUTOMATIC, 
-                                  GTK_POLICY_AUTOMATIC); 
+                                  GTK_POLICY_AUTOMATIC,
+                                  GTK_POLICY_AUTOMATIC);
   gtk_container_add (GTK_CONTAINER (scrolled_window), text_view);
   gtk_fixed_put(GTK_FIXED(fixed), scrolled_window, 10, 480);
   gtk_widget_set_size_request(scrolled_window,400,100);
@@ -492,9 +544,20 @@ int main(int argc, char** argv) {
   gtk_widget_set_size_request(radiovotePlayer[1],60,30);
   g_signal_connect(radiovotePlayer[1], "clicked", G_CALLBACK(voteNon), (gpointer) window);
   gtk_widget_set_sensitive (radiovotePlayer[1], FALSE);
+
+  rebelWinImage = gtk_image_new_from_file("rebel_placard-small.png");
+  gtk_fixed_put(GTK_FIXED(fixed), rebelWinImage, 200, 0);
+  gtk_widget_set_size_request(rebelWinImage, 424, 600);
+
+  spyWinImage = gtk_image_new_from_file("spy_placard-small.png");
+  gtk_fixed_put(GTK_FIXED(fixed), spyWinImage, 200, 0);
+  gtk_widget_set_size_request(spyWinImage, 424, 600);
   
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
   gtk_widget_show_all(window);
+
+  gtk_widget_hide(rebelWinImage);
+  gtk_widget_hide(spyWinImage);
 
   sprintf(com_connexion,"C %s %s %s",localServerAddr,localServerPort,username);
   sendMessageToMainServer(com_connexion);

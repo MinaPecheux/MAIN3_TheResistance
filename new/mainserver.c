@@ -54,6 +54,7 @@ P -> proposition d'equipe
 V -> vote
 L -> lancer la mission
 N -> envoi des comptes de missions reussies/ratees
+R -> resultat de la partie
 */
 
 /* PRINCIPE :
@@ -359,9 +360,9 @@ void *server(void *ptr)
                 break;
             case ENDING_GAME:
             	if(compteurVictoires == END)
-                	sprintf(mess, "m Partie_terminée._Les_REBELLES_ont_gagné.");
+                	sprintf(mess, "R 0");
                 else if(compteurDefaites == END)
-                	sprintf(mess, "m Partie_terminée._Les_ESPIONS_ont_gagné.");
+                	sprintf(mess, "R 1");
                 broadcast(mess);
                 sleep(3);
                 running = 0;
