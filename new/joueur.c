@@ -134,7 +134,7 @@ void *server_func(void *ptr)
       			gtk_widget_set_sensitive (checkboxPlayer[i], FALSE);
       		gtk_widget_set_sensitive (boutonProposition, FALSE);
 
-        	char nom[100];
+        	char nom[50];
         	sscanf(server_thread_buffer , "3 %s", nom);
         	sprintf(mission_meneur_text, "Meneur : %s", nom);
         	gtk_label_set_text ((GtkLabel*)labelMissionMeneur, mission_meneur_text);
