@@ -520,8 +520,10 @@ void voteOui(GtkWidget *widget, gpointer window) {
 	char msg[100];
   sprintf(msg, "V oui %s", username);
 	sendMessageToMainServer(msg);
-	gtk_widget_set_sensitive (radiovotePlayer[0], FALSE);
-	gtk_widget_set_sensitive (radiovotePlayer[1], FALSE);
+  gtk_widget_set_sensitive (radiovotePlayer[0], FALSE);
+  gtk_widget_set_sensitive (radiovotePlayer[1], FALSE);
+  gtk_widget_set_sensitive (radiosucceedPlayer[0], FALSE);
+  gtk_widget_set_sensitive (radiosucceedPlayer[1], FALSE);
 }
 
 void voteNon(GtkWidget *widget, gpointer window) {
@@ -530,6 +532,8 @@ void voteNon(GtkWidget *widget, gpointer window) {
 	sendMessageToMainServer(msg);
 	gtk_widget_set_sensitive (radiovotePlayer[0], FALSE);
 	gtk_widget_set_sensitive (radiovotePlayer[1], FALSE);
+  gtk_widget_set_sensitive (radiosucceedPlayer[0], FALSE);
+  gtk_widget_set_sensitive (radiosucceedPlayer[1], FALSE);
 }
 
 void sendMessageToMainServer(char *mess)
