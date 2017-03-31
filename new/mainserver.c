@@ -264,7 +264,12 @@ void *server(void *ptr)
             	currentState = VOTING_TEAM;
                 break;
             case VOTING_TEAM:
-            	meneurCourant = (meneurCourant + 1) % nbj;
+            	meneurCourant = (meneurCourant + 1);
+                if(meneurCourant >= nbj) {
+                    compteurDefaites = END;
+                    currentState = ENDING_GAME;
+                    break;
+                }
             	compteurVotes = 0;
             	compteurReussites = 0;
 
@@ -362,6 +367,7 @@ void *server(void *ptr)
 
                 break;
             case ENDING_GAME:
+                sleep(2);
             	if(compteurVictoires == END)
                 	sprintf(mess, "R 0");
                 else if(compteurDefaites == END)
