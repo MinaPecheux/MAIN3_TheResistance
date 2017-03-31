@@ -628,7 +628,7 @@ int main(int argc, char** argv) {
 
   /* background image */
   GtkWidget* bgImage;
-  bgImage = gtk_image_new_from_file("background.png");
+  bgImage = gtk_image_new_from_file("./background.png");
   gtk_fixed_put(GTK_FIXED(fixed), bgImage, 0, 0);
 
   sprintf(addr_server_text,"Adresse serveur: %s",argv[1]);
@@ -693,7 +693,7 @@ int main(int argc, char** argv) {
   gtk_widget_set_size_request(labelMissionNbj,200,20);
   gtk_widget_modify_fg (labelMissionNbj, GTK_STATE_NORMAL, &white);
 
-  rebelImage = gtk_image_new_from_file("rebel.png");
+  rebelImage = gtk_image_new_from_file("./rebel.png");
   gtk_fixed_put(GTK_FIXED(fixed), rebelImage, 80, 320);
   gtk_widget_set_size_request(rebelImage, 80, 80);
 
@@ -703,7 +703,7 @@ int main(int argc, char** argv) {
   gtk_widget_set_size_request(labelMissionWin,200,20);
   gtk_widget_modify_fg (labelMissionWin, GTK_STATE_NORMAL, &white);
 
-  spyImage = gtk_image_new_from_file("spy.png");
+  spyImage = gtk_image_new_from_file("./spy.png");
   gtk_fixed_put(GTK_FIXED(fixed), spyImage, 280, 320);
   gtk_widget_set_size_request(spyImage, 80, 80);
 
@@ -747,11 +747,11 @@ int main(int argc, char** argv) {
   g_signal_connect(radiosucceedPlayer[1], "clicked", G_CALLBACK(voteNon), (gpointer) window);
   gtk_widget_set_sensitive (radiosucceedPlayer[1], FALSE);
 
-  rebelWinImage = gtk_image_new_from_file("rebel_placard-small.png");
+  rebelWinImage = gtk_image_new_from_file("./rebel_placard-small.png");
   gtk_fixed_put(GTK_FIXED(fixed), rebelWinImage, 200, 0);
   gtk_widget_set_size_request(rebelWinImage, 424, 600);
 
-  spyWinImage = gtk_image_new_from_file("spy_placard-small.png");
+  spyWinImage = gtk_image_new_from_file("./spy_placard-small.png");
   gtk_fixed_put(GTK_FIXED(fixed), spyWinImage, 200, 0);
   gtk_widget_set_size_request(spyWinImage, 424, 600);
   
