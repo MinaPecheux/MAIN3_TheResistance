@@ -664,6 +664,7 @@ int main(int argc, char** argv) {
 	  GTK_WIDGET_UNSET_FLAGS(checkboxPlayer[i], GTK_CAN_FOCUS);
   	gtk_fixed_put(GTK_FIXED(fixed), checkboxPlayer[i], 100, 100+i*20);
   	gtk_widget_set_size_request(checkboxPlayer[i],30,20);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkboxPlayer[i]), FALSE);
 
   	rolePlayer[i] = gtk_label_new("?");
   	gtk_fixed_put(GTK_FIXED(fixed), rolePlayer[i], 150, 100+i*20);

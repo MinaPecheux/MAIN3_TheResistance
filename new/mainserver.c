@@ -16,6 +16,7 @@ int portno;
 int nbj;  // compteur joueur == nbj pour commencer
 int nbespions;
 int meneurCourant = 0;
+int sameVote = 0;   // pour verifier si le jeton de meneur a fait un tour complet pour un meme vote
 int compteurJoueurs; // pour compter les joueurs
 int compteurMissions = 0; // pour savoir à quelle mission on est
 int compteurVictoires = 0; // pour savoir combien de missions ont ete "succes"
@@ -264,10 +265,13 @@ void *server(void *ptr)
             	currentState = VOTING_TEAM;
                 break;
             case VOTING_TEAM:
-            	meneurCourant = (meneurCourant + 1);
-                if(meneurCourant >= nbj) {
+                meneurCourant = (meneurCourant + 1);
+                if(meneurCourant > nbj) {
                     compteurDefaites = END;
                     currentState = ENDING_GAME;
+                    sprintf(mess, "m L'équipe_d'Intervention_n'est_pas_arrivée_à_temps...");
+                    broadcast(mess);
+                    sleep(2);
                     break;
                 }
             	compteurVotes = 0;
@@ -313,10 +317,13 @@ void *server(void *ptr)
                 		sendMessage(i, mess);
                     }
                     currentState = COMPLETING_MISSION;
+                    sameVote = 0;
+                    meneurCourant = meneurCourant % nbj;
 	            } else {
                     sprintf(mess, "m Equipe_refusée.");
                     broadcast(mess);
                     currentState = PROPOSING_TEAM;
+                    sameVote = 1;
 	            }
 
                 break;
