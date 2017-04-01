@@ -368,15 +368,13 @@ void *server_func(void *ptr)
           strcpy(d->nom, nom);
           gdk_threads_add_idle(got_meneur_value, d);
       	}
-      	else if (server_thread_buffer[0]=='4') {}
-      	else if (server_thread_buffer[0]=='5') {}
-      	else if (server_thread_buffer[0]=='6') {
+      	else if (server_thread_buffer[0]=='4') {
           struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
           d->active = 0;
           strcpy(d->nom, server_thread_buffer);
           gdk_threads_add_idle(got_roles_value, d);
       	}
-      	else if (server_thread_buffer[0]=='7') {
+      	else if (server_thread_buffer[0]=='5') {
           struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
           d->active = 1;
           strcpy(d->nom, server_thread_buffer);
@@ -592,7 +590,7 @@ int main(int argc, char** argv) {
 
   if (argc!=6)
   {
-  	printf("Usage : .joueur @ip_server numport_server @ip_joueur numport_joueur prenom\n");
+  	printf("Usage : ./joueur @ip_server numport_server @ip_joueur numport_joueur prenom\n");
   	exit(1);
   }
 

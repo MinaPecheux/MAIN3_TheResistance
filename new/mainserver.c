@@ -16,7 +16,7 @@ int portno;
 int nbj;  // compteur joueur == nbj pour commencer
 int nbespions;
 int meneurCourant = 0;
-int sameVote = 0;   // pour verifier si le jeton de meneur a fait un tour complet pour un meme vote
+int compteurChangementMeneur = 0;   // combien de fois le jeton de meneur a ete passe a ce tour
 int compteurJoueurs; // pour compter les joueurs
 int compteurMissions = 0; // pour savoir à quelle mission on est
 int compteurVictoires = 0; // pour savoir combien de missions ont ete "succes"
@@ -265,8 +265,8 @@ void *server(void *ptr)
             	currentState = VOTING_TEAM;
                 break;
             case VOTING_TEAM:
-                meneurCourant = (meneurCourant + 1);
-                if(meneurCourant > nbj) {
+                meneurCourant = (meneurCourant + 1) % nbj;
+                if(compteurChangementMeneur == nbj) {
                     compteurDefaites = END;
                     currentState = ENDING_GAME;
                     sprintf(mess, "m L'équipe_d'Intervention_n'est_pas_arrivée_à_temps...");
@@ -317,13 +317,12 @@ void *server(void *ptr)
                 		sendMessage(i, mess);
                     }
                     currentState = COMPLETING_MISSION;
-                    sameVote = 0;
-                    meneurCourant = meneurCourant % nbj;
+                    compteurChangementMeneur = 0;
 	            } else {
                     sprintf(mess, "m Equipe_refusée.");
                     broadcast(mess);
                     currentState = PROPOSING_TEAM;
-                    sameVote = 1;
+                    compteurChangementMeneur++;
 	            }
 
                 break;
@@ -435,10 +434,10 @@ void sendRoles() {
         char mess[100];
         /* rebel */
         if(!tableauJoueurs[i].role)
-            sprintf(mess, "6 %d", i);
+            sprintf(mess, "4 %d", i);
         /* spy */
         else {
-        	strcpy(mess, "7");
+        	strcpy(mess, "5");
         	for(j = 0; j < compteurJoueurs; j++)
         		if(tableauJoueurs[j].role)
             		sprintf(mess, "%s %d", mess, j);
