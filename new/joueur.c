@@ -53,16 +53,16 @@ GtkTextBuffer *buffer;
 GtkWidget *text_view;
 GtkWidget *scrolled_window;
 
-struct mydata_
+typedef struct mydata_
 {
   char nom[100];
   int active;
   int index;
-} mydata;
+} mydata_t;
 
 static gboolean got_connect_value(gpointer user_data)
 {
-  struct mydata_ *pm=(struct mydata_*)user_data;
+  mydata_t *pm=(mydata_t*)user_data;
   char *nom=pm->nom;
   int index=pm->index;
 
@@ -75,7 +75,7 @@ static gboolean got_connect_value(gpointer user_data)
 
 static gboolean got_roles_value(gpointer user_data)
 {
-  struct mydata_ *pm=(struct mydata_*)user_data;
+  mydata_t *pm=(mydata_t*)user_data;
   char *nom=pm->nom;
   int active=pm->active;
 
@@ -104,7 +104,7 @@ static gboolean got_roles_value(gpointer user_data)
 
 static gboolean got_meneur_value(gpointer user_data)
 {
-  struct mydata_ *pm=(struct mydata_*)user_data;
+  mydata_t *pm=(mydata_t*)user_data;
   char *nom=pm->nom;
   int active = pm->active;
 
@@ -136,7 +136,7 @@ static gboolean got_meneur_value(gpointer user_data)
 
 static gboolean got_checkbox_values(gpointer user_data)
 {
-  struct mydata_ *pm=(struct mydata_*)user_data;
+  mydata_t *pm=(mydata_t*)user_data;
   char *nom=pm->nom;
   int active=pm->active;
   int index=pm->index;
@@ -155,7 +155,7 @@ static gboolean got_checkbox_values(gpointer user_data)
 
 static gboolean got_mission_values(gpointer user_data)
 {
-  struct mydata_ *pm=(struct mydata_*)user_data;
+  mydata_t *pm=(mydata_t*)user_data;
   int active = pm->active;
   int index = pm->index;
 
@@ -171,7 +171,7 @@ static gboolean got_mission_values(gpointer user_data)
 
 static gboolean got_vote_values(gpointer user_data)
 {
-  struct mydata_ *pm=(struct mydata_*)user_data;
+  mydata_t *pm=(mydata_t*)user_data;
   int active = pm->active;
   int index = pm->index;
 
@@ -187,7 +187,7 @@ static gboolean got_vote_values(gpointer user_data)
 
 static gboolean got_launch_values(gpointer user_data)
 {
-  struct mydata_ *pm=(struct mydata_*)user_data;
+  mydata_t *pm=(mydata_t*)user_data;
   int active = pm->active;
   int index = pm->index;
 
@@ -213,7 +213,7 @@ static gboolean got_launch_values(gpointer user_data)
 
 static gboolean got_mission_win_values(gpointer user_data)
 {
-  struct mydata_ *pm=(struct mydata_*)user_data;
+  mydata_t *pm=(mydata_t*)user_data;
   int active = pm->active;
   int index = pm->index;
 
@@ -229,7 +229,7 @@ static gboolean got_mission_win_values(gpointer user_data)
 
 static gboolean got_final_result_values(gpointer user_data)
 {
-  struct mydata_ *pm=(struct mydata_*)user_data;
+  mydata_t *pm=(mydata_t*)user_data;
   int index = pm->index;
 
   gtk_widget_hide(labelAddrServer);
@@ -266,7 +266,7 @@ static gboolean got_final_result_values(gpointer user_data)
 
 static gboolean got_buffer_value(gpointer user_data)
 {
-  struct mydata_ *pm=(struct mydata_*)user_data;
+  mydata_t *pm=(mydata_t*)user_data;
   char *nom = pm->nom;
 
   GtkTextMark *mark;
@@ -337,7 +337,7 @@ void *server_func(void *ptr)
       	if (server_thread_buffer[0]=='1') {
       		int j_index = 0;
       		sscanf(server_thread_buffer, "1 %d", &j_index);
-          struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+          mydata_t* d = (mydata_t*)malloc(sizeof(mydata_t));
           d->active = 1;
           d->index = j_index;
           gdk_threads_add_idle(got_checkbox_values, d);
@@ -345,7 +345,7 @@ void *server_func(void *ptr)
       	else if (server_thread_buffer[0]=='0') {
       		int j_index = 0;
       		sscanf(server_thread_buffer, "0 %d", &j_index);
-          struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+          mydata_t* d = (mydata_t*)malloc(sizeof(mydata_t));
           d->active = 0;
           d->index = j_index;
           gdk_threads_add_idle(got_checkbox_values, d);
@@ -354,7 +354,7 @@ void *server_func(void *ptr)
           char nom[50];
           sscanf(server_thread_buffer , "2 %s", nom);
 
-          struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+          mydata_t* d = (mydata_t*)malloc(sizeof(mydata_t));
           d->active = 1;
           strcpy(d->nom, nom);
           gdk_threads_add_idle(got_meneur_value, d);
@@ -363,19 +363,19 @@ void *server_func(void *ptr)
           char nom[50];
           sscanf(server_thread_buffer , "3 %s", nom);
 
-          struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+          mydata_t* d = (mydata_t*)malloc(sizeof(mydata_t));
           d->active = 0;
           strcpy(d->nom, nom);
           gdk_threads_add_idle(got_meneur_value, d);
       	}
       	else if (server_thread_buffer[0]=='4') {
-          struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+          mydata_t* d = (mydata_t*)malloc(sizeof(mydata_t));
           d->active = 0;
           strcpy(d->nom, server_thread_buffer);
           gdk_threads_add_idle(got_roles_value, d);
       	}
       	else if (server_thread_buffer[0]=='5') {
-          struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+          mydata_t* d = (mydata_t*)malloc(sizeof(mydata_t));
           d->active = 1;
           strcpy(d->nom, server_thread_buffer);
           gdk_threads_add_idle(got_roles_value, d);
@@ -390,7 +390,7 @@ void *server_func(void *ptr)
 		
 		      printf("nom=%s index=%d\n", nom, index);
 
-          struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+          mydata_t* d = (mydata_t*)malloc(sizeof(mydata_t));
           strcpy(d->nom, nom);
           d->index = index;
           gdk_threads_add_idle(got_connect_value, d);
@@ -399,7 +399,7 @@ void *server_func(void *ptr)
           int mission_nb = 0;
           sscanf (server_thread_buffer , "M %d %d", &mission_nb, &mission_nbj);
 
-          struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+          mydata_t* d = (mydata_t*)malloc(sizeof(mydata_t));
           d->active = mission_nb;
           d->index = mission_nbj;
           gdk_threads_add_idle(got_mission_values, d);
@@ -409,7 +409,7 @@ void *server_func(void *ptr)
         int playerId;
         sscanf(server_thread_buffer, "V %c %d", &vote, &playerId);
 
-        struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+        mydata_t* d = (mydata_t*)malloc(sizeof(mydata_t));
         d->index = playerId;
         if(vote == 'o') {
           d->active = 1;
@@ -423,7 +423,7 @@ void *server_func(void *ptr)
         int role, in_team;
         sscanf(server_thread_buffer, "L %d %d", &role, &in_team);
 
-        struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+        mydata_t* d = (mydata_t*)malloc(sizeof(mydata_t));
         d->active = in_team;
         d->index = role;
         gdk_threads_add_idle(got_launch_values, d);
@@ -432,7 +432,7 @@ void *server_func(void *ptr)
         int w, l;
         sscanf(server_thread_buffer, "N %d %d", &w, &l);
 
-        struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+        mydata_t* d = (mydata_t*)malloc(sizeof(mydata_t));
         d->active = w;
         d->index = l;
         gdk_threads_add_idle(got_mission_win_values, d);
@@ -441,7 +441,7 @@ void *server_func(void *ptr)
         int res;
         sscanf(server_thread_buffer, "R %d", &res);
 
-        struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+        mydata_t* d = (mydata_t*)malloc(sizeof(mydata_t));
         d->index = res;
         gdk_threads_add_idle(got_final_result_values, d);
       }
@@ -461,7 +461,7 @@ void *server_func(void *ptr)
         msg_clean[i] = '\0';
         sprintf(msg_clean, "%s\n", msg_clean);
 
-        struct mydata_* d = (struct mydata_*)malloc(sizeof(struct mydata_));
+        mydata_t* d = (mydata_t*)malloc(sizeof(mydata_t));
         strcpy(d->nom, msg_clean);
         gdk_threads_add_idle(got_buffer_value, d);
 	    }
