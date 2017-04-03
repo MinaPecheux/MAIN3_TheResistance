@@ -428,10 +428,9 @@ void broadcast(char *message)
 }
 
 void sendRoles() {
+    char mess[100];
     int i, j;
-    printf("sending roles\n");
     for (i = 0; i < compteurJoueurs; i++) {
-        char mess[100];
         /* rebel */
         if(!tableauJoueurs[i].role)
             sprintf(mess, "4 %d", i);
@@ -450,6 +449,7 @@ void sendMeneur()
 {
     char mess[100];
     int i;
+    printf("sending roles\n");
     for (i = 0; i < compteurJoueurs; i++) {
         if(i == meneurCourant)
             sprintf(mess, "2 %s", tableauJoueurs[meneurCourant].nom);
